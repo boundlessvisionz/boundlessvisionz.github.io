@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<rect width="160" height="160" fill="#fff"/>
+<rect x="45" y="65" width="70" height="30" fill="#f1ebe1"/>
+<text x="80" y="85" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#7a6f64">QR here</text>
+<g fill="#2b2520"><rect x="10" y="10" width="40" height="40"/><rect x="110" y="10" width="40" height="40"/><rect x="10" y="110" width="40" height="40"/></g>
+<g fill="#fff"><rect x="18" y="18" width="24" height="24"/><rect x="118" y="18" width="24" height="24"/><rect x="18" y="118" width="24" height="24"/></g>
+</svg>
