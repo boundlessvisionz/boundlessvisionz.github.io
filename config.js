@@ -39,7 +39,7 @@ window.SITE_CONFIG = {
   sizes: ["6x9", "8x12", "10x15"], // inches
 
   // Listing card text
-  cardFeatures: "4 Frame finishes • 3 Sizes • Digital Files Available",
+  cardFeatures: "4 Frame finishes • 3 Sizes\nDigital Files Available", // \n = new line
   digitalPrice: 399, // ₹, shown on listing cards as "Digital ₹399"
 
   // Price (₹) for each size + frame combination — PLACEHOLDER numbers, edit these
