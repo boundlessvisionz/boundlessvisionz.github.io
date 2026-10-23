@@ -99,7 +99,7 @@
             <h3>${escapeHtml(p.title)}</h3>
             <div class="meta">${escapeHtml(cfg.cardFeatures || "")}</div>
             <div class="desc"></div>
-            ${sold ? "" : `<div class="card-prices">${cfg.digitalPrice ? `Digital ${formatPrice(cfg.digitalPrice)} · ` : ""}Framed from ${formatPrice(minPrice())}</div>`}
+            ${sold ? "" : `<div class="card-prices">${cfg.digitalPrice ? `<span>Digital ${formatPrice(cfg.digitalPrice)}</span><span class="sep"> · </span>` : ""}<span>Framed from ${formatPrice(minPrice())}</span></div>`}
             <div class="card-foot">
               <button class="btn small" data-buy="${i}" ${sold ? "disabled" : ""}>${sold ? "Sold" : "Customize &amp; Buy"}</button>
             </div>

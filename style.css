@@ -318,3 +318,16 @@ dialog { max-width: 880px; max-height: calc(100vh - 32px); }
 @media (max-width: 640px) { .details li { grid-template-columns: 1fr; gap: 2px; } }
 
 .load-error { background: #fdecea; color: #8a1f11; border-bottom: 1px solid #f5c6c0; padding: 12px 16px; text-align: center; font-size: 0.92rem; }
+
+/* ---------- Collection pages & "More from this collection" on phones: 2 per row ---------- */
+@media (max-width: 640px) {
+  #grid, #related-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  #grid .card-body, #related-grid .card-body { padding: 10px 10px 12px; }
+  #grid .card h3, #related-grid .card h3 { font-size: 1.05rem; line-height: 1.2; }
+  #grid .card .meta, #related-grid .card .meta { font-size: 0.72rem; line-height: 1.4; margin: 3px 0 6px; }
+  #grid .card-prices, #related-grid .card-prices { font-size: 0.76rem; line-height: 1.4; margin-bottom: 8px; }
+  #grid .card-prices span, #related-grid .card-prices span { display: block; }
+  #grid .card-prices .sep, #related-grid .card-prices .sep { display: none; }
+  #grid .card-foot .btn, #related-grid .card-foot .btn { padding: 7px 8px; font-size: 0.8rem; }
+  #grid .badge, #related-grid .badge { top: 8px; left: 8px; font-size: 0.65rem; }
+}
