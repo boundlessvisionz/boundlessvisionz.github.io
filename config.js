@@ -3,8 +3,8 @@
 // ============================================================
 window.SITE_CONFIG = {
   brandName: "BoundlessVisionz",
-  heroTitle: "Calm, minimal art for mindful spaces",
-  tagline: "Original digital art, framed and delivered to your door.",
+  heroTitle: "Modern Art Beyond Boundaries",
+  tagline: "Gallery-wrapped canvas prints encased in handcrafted wooden floater frames. Pure texture, zero glare, and no glass reflections.",
   about:
     "Hi! I'm an artist who paints digitally and turns each piece into a framed print. " +
     "Every frame is made to order and packed with care.",
