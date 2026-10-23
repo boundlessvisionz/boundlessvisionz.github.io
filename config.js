@@ -27,12 +27,9 @@ window.SITE_CONFIG = {
   shippingNote: "Ships across India in 7–10 days. Free shipping.",
   policyNote: "Damaged in transit? Send an unboxing video and we'll replace it.",
 
-  // Published Google Sheet (CSV) link. Leave "" to use the sample paintings below.
-  // Sheet columns: Title | Category | Photo | Status | Featured | Description
-  //   Category  -> must match one of the names in "categories" below
-  //   Featured  -> "Yes" to show it in Artist's Picks
-  //   Status    -> Available / Sold / Hidden
-  sheetCsvUrl: "",
+  // Paintings live in paintings.json (title, collection, photo, status, featured, description).
+  // "collection" must match one of the names in "categories" below.
+
 
   // Frame and size options offered for every painting
   frames: ["Black", "White", "Natural Oak", "Deep Walnut"],
@@ -68,13 +65,4 @@ window.SITE_CONFIG = {
     "Ocean Collection",
   ],
 
-  samplePaintings: [
-    { title: "Desert Cactus Oasis", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/16a6-Dz1Sl0TgIiVLwCAZ6arVXcOhUViY/view", status: "Available", featured: "", description: "A solitary cactus rests against sweeping terracotta dunes. Woven canvas textures pair with rich clay and soft sage tones to bring a grounded, slow-living warmth to modern spaces." },
-    { title: "Lone Tree Hillside", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1VPk5Y04Y8Yr4esB7AOI_HUipA1SzSSIt/view", status: "Available", featured: "Yes", description: "" },
-    { title: "Minimal Island Solitude", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1ZOVr8enMmcxf66JaFtRh2OzxhJ9IkJw2/view", status: "Available", featured: "", description: "" },
-    { title: "Misty Green Mountain Ridges", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1V6qRR19uJXppfuCm5k9YpEkPHBrbeYmf/view", status: "Available", featured: "Yes", description: "" },
-    { title: "Sage Green River Valley", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/10UXg-DyN3mVjhQb1p3xsBoZ3WaJ19wZa/view", status: "Available", featured: "", description: "" },
-    { title: "Serene Sage Foliage", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1UJ5-9U7fOoypPKRwgHfBuxzdae6rkq2Q/view", status: "Available", featured: "", description: "" },
-    { title: "Terracotta Desert Horizon", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1lyw6n0dJCQ4QHkdgniQIW4ziTp9oe0jb/view", status: "Available", featured: "Yes", description: "" },
-  ],
 };

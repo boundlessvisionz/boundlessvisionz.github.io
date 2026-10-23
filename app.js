@@ -37,48 +37,34 @@
     return m && url.includes("drive.google.com") ? `https://lh3.googleusercontent.com/d/${m[1]}=w1600` : url.trim();
   }
 
-  // Minimal CSV parser (handles quoted fields with commas/newlines)
-  function parseCsv(text) {
-    const rows = [];
-    let row = [], field = "", inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-      if (inQuotes) {
-        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
-        else if (c === '"') inQuotes = false;
-        else field += c;
-      } else if (c === '"') inQuotes = true;
-      else if (c === ",") { row.push(field); field = ""; }
-      else if (c === "\n" || c === "\r") {
-        if (c === "\r" && text[i + 1] === "\n") i++;
-        row.push(field); rows.push(row); row = []; field = "";
-      } else field += c;
-    }
-    if (field || row.length) { row.push(field); rows.push(row); }
-    return rows;
-  }
-
-  function rowsToPaintings(rows) {
-    const header = rows.shift().map((h) => h.trim().toLowerCase());
-    const col = (name) => header.indexOf(name);
-    return rows
-      .filter((r) => r[col("title")] && r[col("title")].trim())
+  // ---------- Load paintings.json ----------
+  // Fields: title, collection, photo, status (Available / Sold / Hidden), featured (true/false), description
+  function normalise(raw) {
+    return (Array.isArray(raw) ? raw : [])
+      .filter((r) => r && String(r.title || "").trim())
       .map((r) => ({
-        title: r[col("title")]?.trim(),
-        category: col("category") >= 0 ? r[col("category")]?.trim() : "",
-        featured: col("featured") >= 0 ? r[col("featured")]?.trim() : "",
-        photo: r[col("photo")]?.trim(),
-        status: r[col("status")]?.trim() || "Available",
-        description: col("description") >= 0 ? r[col("description")]?.trim() : "",
+        title: String(r.title).trim(),
+        category: String(r.collection || r.category || "").trim(),
+        photo: String(r.photo || "").trim(),
+        status: String(r.status || "Available").trim(),
+        featured: r.featured === true || /^(yes|y|true|1)$/i.test(String(r.featured || "").trim()) ? "Yes" : "",
+        description: String(r.description || "").trim(),
       }))
       .filter((p) => p.status.toLowerCase() !== "hidden");
   }
 
   async function loadPaintings() {
-    if (!cfg.sheetCsvUrl) return cfg.samplePaintings;
-    const res = await fetch(cfg.sheetCsvUrl, { cache: "no-store" });
-    if (!res.ok) throw new Error("Sheet fetch failed");
-    return rowsToPaintings(parseCsv(await res.text()));
+    const res = await fetch("paintings.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Could not load paintings.json (HTTP " + res.status + ")");
+    const text = await res.text();
+    try {
+      return normalise(JSON.parse(text));
+    } catch (err) {
+      // Point to the line with the mistake, e.g. a missing comma or quote
+      const pos = Number((String(err.message).match(/position (\d+)/) || [])[1]);
+      const line = isNaN(pos) ? "" : " near line " + text.slice(0, pos).split("\n").length;
+      throw new Error("paintings.json has a formatting mistake" + line + ". Check for a missing comma, quote or bracket.");
+    }
   }
 
   // ---------- Pricing ----------
@@ -421,7 +407,13 @@
   // ---------- Go ----------
   loadPaintings()
     .then((list) => { paintings = list; render(); })
-    .catch(() => {
-      $("#grid").innerHTML = '<p class="muted">Couldn\'t load paintings right now. Please refresh in a moment.</p>';
+    .catch((err) => {
+      console.error(err);
+      const box = document.createElement("div");
+      box.className = "load-error";
+      box.textContent = "⚠️ " + err.message;
+      document.querySelector(".site-header").after(box);
+      $("#picks").hidden = true;
+      $("#cat-tiles").innerHTML = '<p class="muted">Paintings couldn\'t be loaded right now. Please refresh in a moment.</p>';
     });
 })();

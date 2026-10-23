@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Desert Cactus Oasis",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/16a6-Dz1Sl0TgIiVLwCAZ6arVXcOhUViY/view",
+    "status": "Available",
+    "featured": false,
+    "description": "A solitary cactus rests against sweeping terracotta dunes. Woven canvas textures pair with rich clay and soft sage tones to bring a grounded, slow-living warmth to modern spaces."
+  },
+  {
+    "title": "Lone Tree Hillside",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/1VPk5Y04Y8Yr4esB7AOI_HUipA1SzSSIt/view",
+    "status": "Available",
+    "featured": true,
+    "description": ""
+  },
+  {
+    "title": "Minimal Island Solitude",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/1ZOVr8enMmcxf66JaFtRh2OzxhJ9IkJw2/view",
+    "status": "Available",
+    "featured": false,
+    "description": ""
+  },
+  {
+    "title": "Misty Green Mountain Ridges",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/1V6qRR19uJXppfuCm5k9YpEkPHBrbeYmf/view",
+    "status": "Available",
+    "featured": true,
+    "description": ""
+  },
+  {
+    "title": "Sage Green River Valley",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/10UXg-DyN3mVjhQb1p3xsBoZ3WaJ19wZa/view",
+    "status": "Available",
+    "featured": false,
+    "description": ""
+  },
+  {
+    "title": "Serene Sage Foliage",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/1UJ5-9U7fOoypPKRwgHfBuxzdae6rkq2Q/view",
+    "status": "Available",
+    "featured": false,
+    "description": ""
+  },
+  {
+    "title": "Terracotta Desert Horizon",
+    "collection": "Japandi Landscapes",
+    "photo": "https://drive.google.com/file/d/1lyw6n0dJCQ4QHkdgniQIW4ziTp9oe0jb/view",
+    "status": "Available",
+    "featured": true,
+    "description": ""
+  }
+]
