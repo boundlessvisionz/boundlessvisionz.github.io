@@ -27,7 +27,7 @@
     return isNaN(n) || !n ? String(p) : "₹" + n.toLocaleString("en-IN");
   };
 
-  // "Light wood" -> "light-wood"; also used for collection URLs like #/collection/japandi-landscapes
+  // "Natural Oak" -> "natural-oak"; also used for collection URLs like #/collection/japandi-landscapes
   const slug = (c) => String(c).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   // Turn a Google Drive share link into a direct image link
@@ -83,6 +83,9 @@
 
   // ---------- Pricing ----------
   const priceFor = (size, frame) => Number(cfg.prices?.[size]?.[frame]) || 0;
+  const isDigital = (o) => o.format === "digital";
+  const orderPrice = (o) => (isDigital(o) ? Number(cfg.digitalPrice) || 0 : priceFor(o.size, o.frame));
+  const orderLabel = (o) => (isDigital(o) ? "Digital download (300 DPI files)" : `${sizeLabel(o.size)} · ${o.frame} frame`);
   const minPrice = () => Math.min(...cfg.sizes.flatMap((sz) => cfg.frames.map((f) => priceFor(sz, f))).filter(Boolean));
   const frameClass = (f) => slug(f);
   const sizeLabel = (sz) => sz.replace("x", " × ") + " in";
@@ -152,7 +155,7 @@
       : '<p class="muted">New paintings coming soon!</p>';
   }
 
-  // Pages: home  |  #/collection/<name>  |  #/painting/<title>  |  #/checkout/<title>/<size>/<frame>
+  // Pages: home  |  #/collection/<name>  |  #/painting/<title>  |  #/checkout/...
   const paintingUrl = (p) => "#/painting/" + slug(p.title);
   const collectionUrl = (c) => "#/collection/" + slug(c);
 
@@ -160,13 +163,21 @@
     const h = location.hash;
     const cm = h.match(/^#\/collection\/(.+)$/);
     const pm = h.match(/^#\/painting\/(.+)$/);
-    const km = h.match(/^#\/checkout\/([^/]+)\/([^/]+)\/([^/]+)$/);
-    const kp = km && paintings.find((p) => slug(p.title) === km[1]);
-    const ksize = km && cfg.sizes.find((sz) => sz === km[2]);
-    const kframe = km && cfg.frames.find((f) => slug(f) === km[3]);
-    const checkout = kp && ksize && kframe && !isSold(kp);
     const cat = cm && (cfg.categories || []).find((c) => slug(c) === cm[1]);
     const painting = pm && paintings.find((p) => slug(p.title) === pm[1]);
+    // #/checkout/<title>/digital  or  #/checkout/<title>/<size>/<frame>
+    const km = h.match(/^#\/checkout\/([^/]+)\/(.+)$/);
+    const kp = km && paintings.find((p) => slug(p.title) === km[1]);
+    let checkout = null;
+    if (kp && !isSold(kp)) {
+      if (km[2] === "digital") checkout = { p: kp, format: "digital", frame: cfg.frames[0], size: cfg.sizes[0] };
+      else {
+        const [sz, fr] = km[2].split("/");
+        const size = cfg.sizes.find((x) => x === sz);
+        const frame = cfg.frames.find((f) => slug(f) === fr);
+        if (size && frame) checkout = { p: kp, format: "framed", frame, size };
+      }
+    }
     const onHome = !cat && !painting && !checkout;
 
     document.querySelectorAll(".home-only").forEach((el) => el.classList.toggle("is-hidden", !onHome));
@@ -179,7 +190,7 @@
       document.title = `${cat} · ${cfg.brandName}`;
       window.scrollTo(0, 0);
     } else if (checkout) {
-      renderCheckout(kp, kframe, ksize);
+      renderCheckout(checkout);
       document.title = `Checkout · ${cfg.brandName}`;
       window.scrollTo(0, 0);
     } else if (painting) {
@@ -213,21 +224,25 @@
   }
 
   // ---------- Product page ----------
-  let current = null; // { p, frame, size }
+  let current = null; // { p, format: "framed" | "digital", frame, size }
 
   function updateDetail() {
     const { frame, size } = current;
-    const price = priceFor(size, frame);
+    const digital = isDigital(current);
 
-    $("#frame").className = "frame " + frameClass(frame);
+    document.querySelectorAll("#format-opts .format-btn").forEach((b) => b.classList.toggle("selected", b.dataset.format === current.format));
+    $("#framed-opts").hidden = digital;
+    $("#digital-note").hidden = !digital;
+    $("#frame").className = "frame " + (digital ? "digital" : frameClass(frame));
     $("#frame-name").textContent = frame;
     document.querySelectorAll("#frame-opts .swatch").forEach((b) => b.classList.toggle("selected", b.dataset.frame === frame));
     document.querySelectorAll("#size-opts .size-btn").forEach((b) => b.classList.toggle("selected", b.dataset.size === size));
-    $("#buy-price").textContent = formatPrice(price);
+    $("#buy-price").textContent = formatPrice(orderPrice(current));
+    $("#to-pay").textContent = digital ? "Get Instant Download" : "Buy now";
   }
 
   function renderProduct(p) {
-    if (!current || current.p !== p) current = { p, frame: cfg.frames[0], size: cfg.sizes[0] };
+    if (!current || current.p !== p) current = { p, format: "framed", frame: cfg.frames[0], size: cfg.sizes[0] };
 
     $("#buy-img").src = driveToImage(p.photo);
     $("#buy-img").alt = p.title;
@@ -238,9 +253,10 @@
     $("#crumb-cat").href = p.category ? collectionUrl(p.category) : "#collections";
     $("#crumb-title").textContent = p.title;
     $("#buy-desc").textContent = p.description || "";
-    $("#desc-block").hidden = !p.description;
-    $("#d-sizes").textContent = cfg.sizes.map(sizeLabel).join(", ");
-    $("#d-frames").textContent = cfg.frames.join(", ");
+    $("#buy-desc").hidden = !p.description;
+    $("#details").innerHTML = (cfg.productDetails || [])
+      .map(([k, v]) => `<li><span>${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></li>`)
+      .join("");
 
     const related = paintings.filter((o) => o !== p && !isSold(o) && sameCat(o.category, p.category)).slice(0, 4);
     $("#related").hidden = !related.length;
@@ -257,34 +273,46 @@
   }
 
   // ---------- Checkout page ----------
-  const checkoutUrl = ({ p, frame, size }) => `#/checkout/${slug(p.title)}/${size}/${slug(frame)}`;
+  const checkoutUrl = (o) =>
+    `#/checkout/${slug(o.p.title)}/` + (isDigital(o) ? "digital" : `${o.size}/${slug(o.frame)}`);
 
-  function renderCheckout(p, frame, size) {
-    current = { p, frame, size };
-    const price = priceFor(size, frame);
+  function renderCheckout(order) {
+    current = order;
+    const { p } = order;
+    const digital = isDigital(order);
+    const price = orderPrice(order);
 
     $("#checkout-back").href = paintingUrl(p);
     $("#sum-change").href = paintingUrl(p);
     $("#sum-img").src = driveToImage(p.photo);
     $("#sum-img").alt = p.title;
-    $("#sum-frame").className = "frame sum-frame " + frameClass(frame);
+    $("#sum-frame").className = "frame sum-frame " + (digital ? "digital" : frameClass(order.frame));
     $("#sum-title").textContent = p.title;
-    $("#sum-opts").textContent = `${sizeLabel(size)} · ${frame} frame`;
+    $("#sum-opts").textContent = orderLabel(order);
     $("#sum-total").textContent = formatPrice(price);
+    $("#sum-note").textContent = digital ? "Files delivered instantly via email/WhatsApp after payment." : cfg.shippingNote;
+
+    // Digital orders need no shipping address
+    $("#details-heading").textContent = digital ? "1. Your details" : "1. Delivery details";
+    document.querySelectorAll("#address-step [data-physical]").forEach((el) => (el.hidden = digital));
+    document.querySelectorAll("#address-step [data-digital]").forEach((el) => (el.hidden = !digital));
 
     $("#buy-qr").src = cfg.upiQrImage;
     $("#buy-upi").textContent = cfg.upiId;
-    const note = `${p.title} - ${sizeLabel(size)} - ${frame} frame`;
-    const upi = new URLSearchParams({ pa: cfg.upiId, pn: cfg.upiName, am: price, cu: "INR", tn: note });
+    const upi = new URLSearchParams({ pa: cfg.upiId, pn: cfg.upiName, am: price, cu: "INR", tn: `${p.title} - ${orderLabel(order)}` });
     $("#buy-upi-link").href = "upi://pay?" + upi.toString();
 
-    // Always start at the delivery step (details typed earlier are kept)
+    // Always start at the details step (details typed earlier are kept)
     $("#orders-closed").hidden = !!cfg.ordersOpen;
     $("#pay-step").hidden = true;
     $("#address-step").hidden = !cfg.ordersOpen;
     $("#address-error").hidden = true;
   }
 
+  $("#format-opts").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-format]");
+    if (b) { current.format = b.dataset.format; updateDetail(); }
+  });
   $("#frame-opts").addEventListener("click", (e) => {
     const b = e.target.closest("[data-frame]");
     if (b) { current.frame = b.dataset.frame; updateDetail(); }
@@ -308,9 +336,15 @@
     const v = Object.fromEntries([...new FormData(f)].map(([k, val]) => [k, String(val).trim()]));
     v.phone = v.phone.replace(/\D/g, "").replace(/^(91|0)(?=\d{10}$)/, "");
     const bad = [];
-    ["name", "address", "city", "state"].forEach((k) => { if (!v[k]) bad.push(k); });
-    if (!/^[6-9]\d{9}$/.test(v.phone)) bad.push("phone");
-    if (!/^\d{6}$/.test(v.pincode)) bad.push("pincode");
+    if (!v.name) bad.push("name");
+    if (isDigital(current)) {
+      if (!/^\d{10,15}$/.test(v.phone)) bad.push("phone");
+      if (v.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) bad.push("email");
+    } else {
+      ["address", "city", "state"].forEach((k) => { if (!v[k]) bad.push(k); });
+      if (!/^[6-9]\d{9}$/.test(v.phone)) bad.push("phone");
+      if (!/^\d{6}$/.test(v.pincode)) bad.push("pincode");
+    }
     f.querySelectorAll("input, textarea").forEach((el) => el.classList.toggle("invalid", bad.includes(el.name)));
     return { v, bad };
   }
@@ -328,25 +362,42 @@
     }
     $("#address-error").hidden = true;
 
-    const { p, frame, size } = current;
-    const price = priceFor(size, frame);
-    const addressLines = [v.address, v.landmark && "Landmark: " + v.landmark, `${v.city}, ${v.state} - ${v.pincode}`].filter(Boolean);
-    $("#ship-to").textContent = `Shipping to: ${v.name} (${v.phone})\n` + addressLines.join("\n");
-
-    const msg = [
-      "Hi! I'd like to order:",
-      `• ${p.title}`,
-      `• Size: ${sizeLabel(size)}`,
-      `• Frame: ${frame}`,
-      `• Amount paid: ${formatPrice(price)}`,
-      "",
-      "Deliver to:",
-      v.name,
-      v.phone,
-      ...addressLines,
-      "",
-      "Payment screenshot attached.",
-    ].join("\n");
+    const { p } = current;
+    const price = orderPrice(current);
+    let msg;
+    if (isDigital(current)) {
+      $("#ship-to").textContent = `Send files to: ${v.name}\nWhatsApp: ${v.phone}` + (v.email ? `\nEmail: ${v.email}` : "");
+      msg = [
+        "Hi! I'd like to buy the digital download:",
+        `• ${p.title}`,
+        "• Format: Digital download (300 DPI files)",
+        `• Amount paid: ${formatPrice(price)}`,
+        "",
+        "Send the files to:",
+        v.name,
+        v.phone,
+        v.email,
+        "",
+        "Payment screenshot attached.",
+      ].filter((line) => line !== undefined && line !== null).join("\n").replace(/\n\n\n/g, "\n\n");
+    } else {
+      const addressLines = [v.address, v.landmark && "Landmark: " + v.landmark, `${v.city}, ${v.state} - ${v.pincode}`].filter(Boolean);
+      $("#ship-to").textContent = `Shipping to: ${v.name} (${v.phone})\n` + addressLines.join("\n");
+      msg = [
+        "Hi! I'd like to order:",
+        `• ${p.title}`,
+        `• Size: ${sizeLabel(current.size)}`,
+        `• Frame: ${current.frame}`,
+        `• Amount paid: ${formatPrice(price)}`,
+        "",
+        "Deliver to:",
+        v.name,
+        v.phone,
+        ...addressLines,
+        "",
+        "Payment screenshot attached.",
+      ].join("\n");
+    }
     $("#buy-wa").href = `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(msg)}`;
 
     $("#address-step").hidden = true;

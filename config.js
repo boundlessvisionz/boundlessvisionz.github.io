@@ -35,19 +35,29 @@ window.SITE_CONFIG = {
   sheetCsvUrl: "",
 
   // Frame and size options offered for every painting
-  frames: ["Black", "White", "Light wood"],
+  frames: ["Black", "White", "Natural Oak", "Deep Walnut"],
   sizes: ["6x9", "8x12", "10x15"], // inches
 
   // Listing card text
-  cardFeatures: "4 Frame finishes • 3 Sizes\nDigital Files Available", // \n = new line
-  digitalPrice: 399, // ₹, shown on listing cards as "Digital ₹399"
+  cardFeatures: "3 Sizes • 4 Frame Finishes\nDigital Files Available", // \n = new line
+  digitalPrice: 399, // ₹, flat price for the Digital Download format
 
   // Price (₹) for each size + frame combination — PLACEHOLDER numbers, edit these
   prices: {
-    "6x9":   { "Black": 999,  "White": 999,  "Light wood": 1199 },
-    "8x12":  { "Black": 1499, "White": 1499, "Light wood": 1699 },
-    "10x15": { "Black": 1999, "White": 1999, "Light wood": 2299 },
+    "6x9":   { "Black": 999,  "White": 999,  "Natural Oak": 1199, "Deep Walnut": 1199 },
+    "8x12":  { "Black": 1499, "White": 1499, "Natural Oak": 1699, "Deep Walnut": 1699 },
+    "10x15": { "Black": 1999, "White": 1999, "Natural Oak": 2299, "Deep Walnut": 2299 },
   },
+
+  // "Details" list on every product page: [label, text]
+  productDetails: [
+    ["Material", "Heavyweight textured canvas stretched over solid timber (Zero glass, 100% glare-free)."],
+    ["Frame Finish", "Handcrafted wooden floater casing in Black, White, Natural Oak, or Deep Walnut."],
+    ["Sizes", "6 x 9 in, 8 x 12 in, 10 x 15 in (Arrives ready to hang)."],
+    ["Digital Option", "Includes 300 DPI high-resolution files delivered instantly via email/WhatsApp."],
+    ["Shipping", "Handcrafted to order. Free doorstep delivery across India in 7–10 business days."],
+    ["Safe Transit Guarantee", "Damaged in transit? Send an unboxing video and we'll send a free replacement."],
+  ],
 
   // Collections, in the order they appear on the site
   categories: [
@@ -59,8 +69,8 @@ window.SITE_CONFIG = {
   ],
 
   samplePaintings: [
-    { title: "Desert Cactus Oasis", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/16a6-Dz1Sl0TgIiVLwCAZ6arVXcOhUViY/view", status: "Available", featured: "", description: "" },
-    { title: "Lone Tree Hillside", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1VPk5Y04Y8Yr4esB7AOI_HUipA1SzSSIt/view", status: "Available", featured: "Yes", description: "SAMPLE TEXT - replace from the Sheet.\nA single tree on a soft, rolling hill, with birds drifting across a quiet sky.\n\nPerfect for a bedroom, reading corner or workspace." },
+    { title: "Desert Cactus Oasis", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/16a6-Dz1Sl0TgIiVLwCAZ6arVXcOhUViY/view", status: "Available", featured: "", description: "A solitary cactus rests against sweeping terracotta dunes. Woven canvas textures pair with rich clay and soft sage tones to bring a grounded, slow-living warmth to modern spaces." },
+    { title: "Lone Tree Hillside", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1VPk5Y04Y8Yr4esB7AOI_HUipA1SzSSIt/view", status: "Available", featured: "Yes", description: "" },
     { title: "Minimal Island Solitude", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1ZOVr8enMmcxf66JaFtRh2OzxhJ9IkJw2/view", status: "Available", featured: "", description: "" },
     { title: "Misty Green Mountain Ridges", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/1V6qRR19uJXppfuCm5k9YpEkPHBrbeYmf/view", status: "Available", featured: "Yes", description: "" },
     { title: "Sage Green River Valley", category: "Japandi Landscapes", photo: "https://drive.google.com/file/d/10UXg-DyN3mVjhQb1p3xsBoZ3WaJ19wZa/view", status: "Available", featured: "", description: "" },

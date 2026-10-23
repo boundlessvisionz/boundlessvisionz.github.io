@@ -67,29 +67,29 @@
       <div class="product-info">
         <a class="tag" id="buy-cat" href="#"></a>
         <h1 id="buy-title"></h1>
+        <p class="lead-desc" id="buy-desc"></p>
 
-        <div class="opt-label">Frame: <strong id="frame-name"></strong></div>
-        <div class="opts" id="frame-opts"></div>
+        <div class="opt-label">Format</div>
+        <div class="format-opts" id="format-opts">
+          <button class="format-btn" data-format="framed"><strong>Framed Canvas</strong><span>Physical</span></button>
+          <button class="format-btn" data-format="digital"><strong>Digital Download</strong><span>Instant File</span></button>
+        </div>
 
-        <div class="opt-label">Size (inches)</div>
-        <div class="opts" id="size-opts"></div>
+        <div id="framed-opts">
+          <div class="opt-label">Frame: <strong id="frame-name"></strong></div>
+          <div class="opts" id="frame-opts"></div>
+
+          <div class="opt-label">Size (inches)</div>
+          <div class="opts" id="size-opts"></div>
+        </div>
+        <p class="digital-note" id="digital-note" hidden>300 DPI high-resolution files, delivered instantly via email/WhatsApp. Print at any size you like.</p>
 
         <p class="price big" id="buy-price"></p>
         <button class="btn" id="to-pay">Buy now</button>
 
-        <div class="product-section" id="desc-block">
-          <h4>Description</h4>
-          <p class="desc-text" id="buy-desc"></p>
-        </div>
-
         <div class="product-section">
           <h4>Details</h4>
-          <ul class="details">
-            <li><span>Sizes</span><span id="d-sizes"></span></li>
-            <li><span>Frames</span><span id="d-frames"></span></li>
-            <li><span>Shipping</span><span data-shipping></span></li>
-            <li><span>Returns</span><span data-policy></span></li>
-          </ul>
+          <ul class="details" id="details"></ul>
         </div>
       </div>
     </div>
@@ -112,16 +112,17 @@
         </div>
 
         <form id="address-step" class="address-form" hidden novalidate>
-          <h4>1. Delivery details</h4>
+          <h4 id="details-heading">1. Delivery details</h4>
           <label>Full name<input name="name" autocomplete="name" required></label>
           <label>Phone number<input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile" required></label>
-          <label>Address<textarea name="address" rows="2" autocomplete="street-address" placeholder="House no., building, street, area" required></textarea></label>
-          <label>Landmark <span class="muted">(optional)</span><input name="landmark"></label>
-          <div class="row">
+          <label data-digital>Email <span class="muted">(optional, for the file)</span><input name="email" type="email" autocomplete="email"></label>
+          <label data-physical>Address<textarea name="address" rows="2" autocomplete="street-address" placeholder="House no., building, street, area" required></textarea></label>
+          <label data-physical>Landmark <span class="muted">(optional)</span><input name="landmark"></label>
+          <div class="row" data-physical>
             <label>City<input name="city" autocomplete="address-level2" required></label>
             <label>Pincode<input name="pincode" inputmode="numeric" autocomplete="postal-code" maxlength="6" required></label>
           </div>
-          <label>State<input name="state" autocomplete="address-level1" required></label>
+          <label data-physical>State<input name="state" autocomplete="address-level1" required></label>
           <p class="form-error" id="address-error" hidden></p>
           <button class="btn" type="submit">Continue to payment</button>
         </form>
@@ -153,7 +154,7 @@
           </div>
         </div>
         <div class="sum-row total"><span>Total</span><span id="sum-total"></span></div>
-        <p class="muted sum-note" data-shipping></p>
+        <p class="muted sum-note" id="sum-note"></p>
       </aside>
     </div>
   </section>
