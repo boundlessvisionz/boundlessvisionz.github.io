@@ -278,3 +278,13 @@ dialog { max-width: 880px; max-height: calc(100vh - 32px); }
 @media (max-width: 640px) {
   .wrap.section { padding-left: 16px; padding-right: 16px; }
 }
+
+/* ---------- Compact listing cards ---------- */
+.card .img-wrap { aspect-ratio: 4 / 5; overflow: hidden; }
+.card .img-wrap img { position: absolute; inset: 0; }
+.card-body { padding: 12px 14px 14px; }
+.card h3 { font-size: 1.3rem; line-height: 1.2; }
+.card .meta { font-size: 0.82rem; line-height: 1.45; margin: 4px 0 8px; }
+.card .desc { margin: 0; }
+.card-prices { font-size: 0.8rem; letter-spacing: -0.01em; margin: 0 0 10px; }
+.card-foot .btn { padding: 8px 14px; }

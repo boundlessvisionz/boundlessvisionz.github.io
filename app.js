@@ -109,7 +109,7 @@
             ${showCategory && p.category ? `<div class="tag">${escapeHtml(p.category)}</div>` : ""}
             <h3>${escapeHtml(p.title)}</h3>
             <div class="meta">${escapeHtml(cfg.cardFeatures || "")}</div>
-            ${p.description ? `<p class="desc">${escapeHtml(p.description)}</p>` : '<div class="desc"></div>'}
+            <div class="desc"></div>
             ${sold ? "" : `<div class="card-prices">${cfg.digitalPrice ? `Digital ${formatPrice(cfg.digitalPrice)} · ` : ""}Framed from ${formatPrice(minPrice())}</div>`}
             <div class="card-foot">
               <button class="btn small" data-buy="${i}" ${sold ? "disabled" : ""}>${sold ? "Sold" : "Customize &amp; Buy"}</button>
