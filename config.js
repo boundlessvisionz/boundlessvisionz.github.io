@@ -4,7 +4,7 @@
 window.SITE_CONFIG = {
   brandName: "BoundlessVisionz",
   heroTitle: "Modern Art Beyond Boundaries",
-  tagline: "Gallery-wrapped canvas prints encased in handcrafted wooden floater frames. Pure texture, zero glare, and no glass reflections.",
+  tagline: "Elevate your living space with calm, reflection-free art. Enjoy the organic texture of canvas encased in solid wood frames, or choose instant digital downloads to suit your custom wall size.",
   about:
     "Hi! I'm an artist who paints digitally and turns each piece into a framed print. " +
     "Every frame is made to order and packed with care.",
@@ -37,6 +37,10 @@ window.SITE_CONFIG = {
   // Frame and size options offered for every painting
   frames: ["Black", "White", "Light wood"],
   sizes: ["6x9", "8x12", "10x15"], // inches
+
+  // Listing card text
+  cardFeatures: "4 Frame finishes • 3 Sizes • Digital Files Available",
+  digitalPrice: 399, // ₹, shown on listing cards as "Digital ₹399"
 
   // Price (₹) for each size + frame combination — PLACEHOLDER numbers, edit these
   prices: {
