@@ -331,3 +331,8 @@ dialog { max-width: 880px; max-height: calc(100vh - 32px); }
   #grid .card-foot .btn, #related-grid .card-foot .btn { padding: 7px 8px; font-size: 0.8rem; }
   #grid .badge, #related-grid .badge { top: 8px; left: 8px; font-size: 0.65rem; }
 }
+
+/* Paintings: no long-press save menu on phones, no drag/select */
+.img-wrap img, .frame img, .cat-tile img {
+  -webkit-touch-callout: none; -webkit-user-drag: none; user-select: none; -webkit-user-select: none;
+}

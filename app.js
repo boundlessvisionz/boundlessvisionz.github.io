@@ -396,6 +396,14 @@
     if (buy) location.hash = paintingUrl(paintings[Number(buy.dataset.buy)]);
   });
   window.addEventListener("hashchange", route);
+
+  // Discourage saving paintings: no right-click / long-press menu, no dragging (QR code and logo unaffected)
+  const PAINTING_IMG = ".img-wrap img, .frame img, .cat-tile img";
+  ["contextmenu", "dragstart"].forEach((type) =>
+    document.addEventListener(type, (e) => {
+      if (e.target.closest && e.target.closest(PAINTING_IMG)) e.preventDefault();
+    })
+  );
   $("#copy-upi").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(cfg.upiId);
