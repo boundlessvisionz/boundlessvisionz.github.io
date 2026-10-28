@@ -336,3 +336,8 @@ dialog { max-width: 880px; max-height: calc(100vh - 32px); }
 .img-wrap img, .frame img, .cat-tile img {
   -webkit-touch-callout: none; -webkit-user-drag: none; user-select: none; -webkit-user-select: none;
 }
+
+/* Digital checkout: WhatsApp step */
+.wa-lead { margin: 14px 0 12px; }
+.wa-btn { background: #25d366; border-color: #25d366; }
+.wa-btn:hover { background: #1da851; border-color: #1da851; }

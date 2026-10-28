@@ -14,7 +14,7 @@ window.SITE_CONFIG = {
   ordersOpen: false,
 
   // Contact (WhatsApp number with country code, digits only). Empty = hidden on the site.
-  whatsappNumber: "",
+  whatsappNumber: "918766791945",
   instagramHandle: "",
   email: "",
 
@@ -33,10 +33,10 @@ window.SITE_CONFIG = {
 
   // Frame and size options offered for every painting
   frames: ["Black", "White", "Natural Oak", "Deep Walnut"],
-  sizes: ["6x9", "8x12", "10x15"], // inches
+  sizes: ["6x9", "8x12", "10x15"], // inches. Default sizes; a painting can override with its own "sizes" in paintings.json
 
   // Listing card text
-  cardFeatures: "3 Sizes • 4 Frame Finishes\nDigital Files Available", // \n = new line
+  cardFeatures: "{sizeCount} Sizes • 4 Frame Finishes\nDigital Files Available", // \n = new line, {sizeCount} = number of sizes for that painting
   digitalPrice: 399, // ₹, flat price for the Digital Download format
 
   // Price (₹) for each size + frame combination — PLACEHOLDER numbers, edit these
@@ -50,7 +50,7 @@ window.SITE_CONFIG = {
   productDetails: [
     ["Material", "Heavyweight textured canvas stretched over solid timber (Zero glass, 100% glare-free)."],
     ["Frame Finish", "Handcrafted wooden floater casing in Black, White, Natural Oak, or Deep Walnut."],
-    ["Sizes", "6 x 9 in, 8 x 12 in, 10 x 15 in (Arrives ready to hang)."],
+    ["Sizes", "{sizes} (Arrives ready to hang)."], // {sizes} = that painting's sizes
     ["Digital Option", "Includes 300 DPI high-resolution files delivered instantly via email/WhatsApp."],
     ["Shipping", "Handcrafted to order. Free doorstep delivery across India in 7–10 business days."],
     ["Safe Transit Guarantee", "Damaged in transit? Send an unboxing video and we'll send a free replacement."],

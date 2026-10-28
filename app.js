@@ -49,6 +49,8 @@
         status: String(r.status || "Available").trim(),
         featured: r.featured === true || /^(yes|y|true|1)$/i.test(String(r.featured || "").trim()) ? "Yes" : "",
         description: String(r.description || "").trim(),
+        sizes: Array.isArray(r.sizes) ? r.sizes.map((x) => String(x).trim().toLowerCase().replace(/\s+/g, "")).filter(Boolean) : null,
+        prices: r.prices && typeof r.prices === "object" ? r.prices : null,
       }))
       .filter((p) => p.status.toLowerCase() !== "hidden");
   }
@@ -68,11 +70,19 @@
   }
 
   // ---------- Pricing ----------
-  const priceFor = (size, frame) => Number(cfg.prices?.[size]?.[frame]) || 0;
+  // A painting's own "prices" win; otherwise the shared table in config.js
+  const priceFor = (p, size, frame) => Number(p?.prices?.[size]?.[frame] ?? cfg.prices?.[size]?.[frame]) || 0;
+  // A painting's own "sizes" list (if given), else the default sizes; sizes without any price are left out
+  const sizesFor = (p) => (p?.sizes?.length ? p.sizes : cfg.sizes).filter((sz) => cfg.frames.some((f) => priceFor(p, sz, f)));
   const isDigital = (o) => o.format === "digital";
-  const orderPrice = (o) => (isDigital(o) ? Number(cfg.digitalPrice) || 0 : priceFor(o.size, o.frame));
+  const orderPrice = (o) => (isDigital(o) ? Number(cfg.digitalPrice) || 0 : priceFor(o.p, o.size, o.frame));
   const orderLabel = (o) => (isDigital(o) ? "Digital download (300 DPI files)" : `${sizeLabel(o.size)} · ${o.frame} frame`);
-  const minPrice = () => Math.min(...cfg.sizes.flatMap((sz) => cfg.frames.map((f) => priceFor(sz, f))).filter(Boolean));
+  const minPrice = (p) => Math.min(...sizesFor(p).flatMap((sz) => cfg.frames.map((f) => priceFor(p, sz, f))).filter(Boolean));
+  // Text with {sizes} / {sizeCount} placeholders filled in for a painting
+  const fillSizes = (text, p) => String(text || "")
+    .replace(/\{sizeCount\} Sizes/g, sizesFor(p).length === 1 ? "1 Size" : sizesFor(p).length + " Sizes")
+    .replace(/\{sizeCount\}/g, sizesFor(p).length)
+    .replace(/\{sizes\}/g, sizesFor(p).map((sz) => sz.replace("x", " x ") + " in").join(", "));
   const frameClass = (f) => slug(f);
   const sizeLabel = (sz) => sz.replace("x", " × ") + " in";
 
@@ -97,9 +107,9 @@
           <div class="card-body">
             ${showCategory && p.category ? `<div class="tag">${escapeHtml(p.category)}</div>` : ""}
             <h3>${escapeHtml(p.title)}</h3>
-            <div class="meta">${escapeHtml(cfg.cardFeatures || "")}</div>
+            <div class="meta">${escapeHtml(fillSizes(cfg.cardFeatures, p))}</div>
             <div class="desc"></div>
-            ${sold ? "" : `<div class="card-prices">${cfg.digitalPrice ? `<span>Digital ${formatPrice(cfg.digitalPrice)}</span><span class="sep"> · </span>` : ""}<span>Framed from ${formatPrice(minPrice())}</span></div>`}
+            ${sold ? "" : `<div class="card-prices">${cfg.digitalPrice ? `<span>Digital ${formatPrice(cfg.digitalPrice)}</span><span class="sep"> · </span>` : ""}<span>Framed from ${formatPrice(minPrice(p))}</span></div>`}
             <div class="card-foot">
               <button class="btn small" data-buy="${i}" ${sold ? "disabled" : ""}>${sold ? "Sold" : "Customize &amp; Buy"}</button>
             </div>
@@ -156,10 +166,10 @@
     const kp = km && paintings.find((p) => slug(p.title) === km[1]);
     let checkout = null;
     if (kp && !isSold(kp)) {
-      if (km[2] === "digital") checkout = { p: kp, format: "digital", frame: cfg.frames[0], size: cfg.sizes[0] };
+      if (km[2] === "digital") checkout = { p: kp, format: "digital", frame: cfg.frames[0], size: sizesFor(kp)[0] };
       else {
         const [sz, fr] = km[2].split("/");
-        const size = cfg.sizes.find((x) => x === sz);
+        const size = sizesFor(kp).find((x) => x === sz);
         const frame = cfg.frames.find((f) => slug(f) === fr);
         if (size && frame) checkout = { p: kp, format: "framed", frame, size };
       }
@@ -223,12 +233,14 @@
     $("#frame-name").textContent = frame;
     document.querySelectorAll("#frame-opts .swatch").forEach((b) => b.classList.toggle("selected", b.dataset.frame === frame));
     document.querySelectorAll("#size-opts .size-btn").forEach((b) => b.classList.toggle("selected", b.dataset.size === size));
-    $("#buy-price").textContent = formatPrice(orderPrice(current));
+    const price = orderPrice(current);
+    $("#buy-price").textContent = price ? formatPrice(price) : "Not available in this frame";
+    $("#to-pay").disabled = !price;
     $("#to-pay").textContent = digital ? "Get Instant Download" : "Buy now";
   }
 
   function renderProduct(p) {
-    if (!current || current.p !== p) current = { p, format: "framed", frame: cfg.frames[0], size: cfg.sizes[0] };
+    if (!current || current.p !== p) current = { p, format: "framed", frame: cfg.frames[0], size: sizesFor(p)[0] };
 
     $("#buy-img").src = driveToImage(p.photo);
     $("#buy-img").alt = p.title;
@@ -241,7 +253,7 @@
     $("#buy-desc").textContent = p.description || "";
     $("#buy-desc").hidden = !p.description;
     $("#details").innerHTML = (cfg.productDetails || [])
-      .map(([k, v]) => `<li><span>${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></li>`)
+      .map(([k, v]) => `<li><span>${escapeHtml(k)}</span><span>${escapeHtml(fillSizes(v, p))}</span></li>`)
       .join("");
 
     const related = paintings.filter((o) => o !== p && !isSold(o) && sameCat(o.category, p.category)).slice(0, 4);
@@ -251,7 +263,7 @@
     $("#frame-opts").innerHTML = cfg.frames
       .map((f) => `<button class="swatch ${frameClass(f)}" data-frame="${escapeHtml(f)}" title="${escapeHtml(f)}" aria-label="${escapeHtml(f)} frame"></button>`)
       .join("");
-    $("#size-opts").innerHTML = cfg.sizes
+    $("#size-opts").innerHTML = sizesFor(p)
       .map((sz) => `<button class="size-btn" data-size="${escapeHtml(sz)}">${escapeHtml(sz.replace("x", " × "))}</button>`)
       .join("");
 
@@ -282,6 +294,9 @@
     $("#details-heading").textContent = digital ? "1. Your details" : "1. Delivery details";
     document.querySelectorAll("#address-step [data-physical]").forEach((el) => (el.hidden = digital));
     document.querySelectorAll("#address-step [data-digital]").forEach((el) => (el.hidden = !digital));
+    $("#phone-label").innerHTML = digital ? 'WhatsApp number <span class="muted">(optional)</span>' : "Phone number";
+    $("#address-step").phone.placeholder = digital ? "With country code if outside India" : "10-digit mobile";
+    $("#details-submit").textContent = digital ? "Continue on WhatsApp" : "Continue to payment";
 
     $("#buy-qr").src = cfg.upiQrImage;
     $("#buy-upi").textContent = cfg.upiId;
@@ -291,8 +306,18 @@
     // Always start at the details step (details typed earlier are kept)
     $("#orders-closed").hidden = !!cfg.ordersOpen;
     $("#pay-step").hidden = true;
+    $("#wa-step").hidden = true;
     $("#address-step").hidden = !cfg.ordersOpen;
     $("#address-error").hidden = true;
+  }
+
+  // Short readable order ID, e.g. BV-241028-7K3Q
+  function newOrderId() {
+    const d = new Date();
+    const ymd = String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const rnd = Array.from(crypto.getRandomValues(new Uint8Array(4)), (n) => chars[n % chars.length]).join("");
+    return `BV-${ymd}-${rnd}`;
   }
 
   $("#format-opts").addEventListener("click", (e) => {
@@ -307,6 +332,13 @@
     const b = e.target.closest("[data-size]");
     if (b) { current.size = b.dataset.size; updateDetail(); }
   });
+  // Back from the WhatsApp step to the (still filled-in) digital form
+  $("#edit-digital").addEventListener("click", () => {
+    $("#wa-step").hidden = true;
+    $("#address-step").hidden = false;
+    $("#address-step").name.focus();
+  });
+
   // Back from payment to the (still filled-in) address form
   $("#edit-address").addEventListener("click", () => {
     $("#pay-step").hidden = true;
@@ -324,8 +356,8 @@
     const bad = [];
     if (!v.name) bad.push("name");
     if (isDigital(current)) {
-      if (!/^\d{10,15}$/.test(v.phone)) bad.push("phone");
-      if (v.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) bad.push("email");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) bad.push("email");
+      if (v.phone && !/^\d{10,15}$/.test(v.phone)) bad.push("phone");
     } else {
       ["address", "city", "state"].forEach((k) => { if (!v[k]) bad.push(k); });
       if (!/^[6-9]\d{9}$/.test(v.phone)) bad.push("phone");
@@ -340,8 +372,10 @@
     const { v, bad } = readAddress();
     if (bad.length) {
       const err = $("#address-error");
-      err.textContent = bad.includes("phone") || bad.includes("pincode")
-        ? "Please check the highlighted fields (10-digit phone, 6-digit pincode)."
+      err.textContent = bad.includes("email")
+        ? "Please enter a valid email address. Your files will be sent there."
+        : bad.includes("phone") || bad.includes("pincode")
+        ? "Please check the highlighted fields (phone number, 6-digit pincode)."
         : "Please fill in the highlighted fields.";
       err.hidden = false;
       return;
@@ -352,20 +386,30 @@
     const price = orderPrice(current);
     let msg;
     if (isDigital(current)) {
-      $("#ship-to").textContent = `Send files to: ${v.name}\nWhatsApp: ${v.phone}` + (v.email ? `\nEmail: ${v.email}` : "");
+      const orderId = newOrderId();
       msg = [
-        "Hi! I'd like to buy the digital download:",
-        `• ${p.title}`,
-        "• Format: Digital download (300 DPI files)",
-        `• Amount paid: ${formatPrice(price)}`,
+        "Hi! I'd like to order a digital download 🎨",
         "",
-        "Send the files to:",
-        v.name,
-        v.phone,
-        v.email,
+        `Order ID: ${orderId}`,
+        `Painting: ${p.title}`,
+        "Format: Digital download (300 DPI files)",
+        `Amount: ${formatPrice(price)}`,
         "",
-        "Payment screenshot attached.",
-      ].filter((line) => line !== undefined && line !== null).join("\n").replace(/\n\n\n/g, "\n\n");
+        `Name: ${v.name}`,
+        `Email: ${v.email}`,
+        v.phone ? `WhatsApp: ${v.phone}` : null,
+        "",
+        "Please share the payment details.",
+      ].filter((line) => line !== null).join("\n");
+      const link = `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(msg)}`;
+      $("#wa-summary").textContent = `${v.name}\n${v.email}` + (v.phone ? `\n${v.phone}` : "");
+      $("#wa-order-id").textContent = orderId;
+      $("#wa-open").href = link;
+      $("#address-step").hidden = true;
+      $("#wa-step").hidden = false;
+      $("#wa-step").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      window.open(link, "_blank", "noopener"); // if the browser blocks this, the button above still works
+      return;
     } else {
       const addressLines = [v.address, v.landmark && "Landmark: " + v.landmark, `${v.city}, ${v.state} - ${v.pincode}`].filter(Boolean);
       $("#ship-to").textContent = `Shipping to: ${v.name} (${v.phone})\n` + addressLines.join("\n");

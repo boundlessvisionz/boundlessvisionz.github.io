@@ -114,8 +114,8 @@
         <form id="address-step" class="address-form" hidden novalidate>
           <h4 id="details-heading">1. Delivery details</h4>
           <label>Full name<input name="name" autocomplete="name" required></label>
-          <label>Phone number<input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile" required></label>
-          <label data-digital>Email <span class="muted">(optional, for the file)</span><input name="email" type="email" autocomplete="email"></label>
+          <label data-digital>Email <span class="muted">(your files will be sent here)</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
+          <label><span id="phone-label">Phone number</span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile"></label>
           <label data-physical>Address<textarea name="address" rows="2" autocomplete="street-address" placeholder="House no., building, street, area" required></textarea></label>
           <label data-physical>Landmark <span class="muted">(optional)</span><input name="landmark"></label>
           <div class="row" data-physical>
@@ -124,8 +124,19 @@
           </div>
           <label data-physical>State<input name="state" autocomplete="address-level1" required></label>
           <p class="form-error" id="address-error" hidden></p>
-          <button class="btn" type="submit">Continue to payment</button>
+          <button class="btn" type="submit" id="details-submit">Continue to payment</button>
         </form>
+
+        <div id="wa-step" hidden>
+          <h4>2. Confirm on WhatsApp</h4>
+          <div class="ship-to">
+            <p id="wa-summary"></p>
+            <button class="link" id="edit-digital" type="button">Edit</button>
+          </div>
+          <p class="wa-lead">Your order <strong id="wa-order-id"></strong> is ready. Tap below, then press <strong>Send</strong> in WhatsApp.</p>
+          <a class="btn wa-btn" id="wa-open" target="_blank" rel="noopener">Open WhatsApp</a>
+          <p class="muted small-note">We'll reply on WhatsApp with the payment details (UPI ID / QR). Once your payment is confirmed, your files are sent to your email.</p>
+        </div>
 
         <div id="pay-step" hidden>
           <h4>2. Pay via UPI</h4>

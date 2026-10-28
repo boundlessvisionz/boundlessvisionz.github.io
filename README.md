@@ -33,6 +33,26 @@ Each painting looks like this:
 | `featured` | `true` to show in Artist's Picks, otherwise `false` |
 | `description` | 2 sentences shown under the title on the painting's page. Leave `""` for none. |
 
+### Optional: different sizes for one painting
+By default every painting is offered in **6x9, 8x12 and 10x15** (prices from `config.js`).
+To offer other sizes for one painting, add `"sizes"`. For a size that isn't in the normal
+price list, also add its `"prices"` (one price per frame):
+
+```json
+{
+  "title": "Misty Green Mountain Ridges",
+  ...
+  "sizes": ["8x12", "12x18"],
+  "prices": {
+    "12x18": { "Black": 2799, "White": 2799, "Natural Oak": 3199, "Deep Walnut": 3199 }
+  }
+}
+```
+
+- Write sizes like `"12x18"` (width x height in inches).
+- A size with no price anywhere is hidden automatically.
+- Leave `"sizes"` out to use the default three.
+
 ### To add a new painting
 Copy an existing `{ ... }` block, paste it after another one, and change the values.
 
