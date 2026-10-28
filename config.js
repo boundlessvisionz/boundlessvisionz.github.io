@@ -18,6 +18,10 @@ window.SITE_CONFIG = {
   instagramHandle: "",
   email: "",
 
+  // Google Apps Script web-app URL that records orders in her Sheet and emails the buyer.
+  // Leave "" to skip (orders still go to WhatsApp, with an ID made in the browser).
+  orderEndpoint: "https://script.google.com/macros/s/AKfycbybUAqasuC1h7WY6RzlWSxXeI4vOlgHFgSdrHejvJwaLWeB7btawpVfLEUPEGfBxFuAFQ/exec",
+
   // Payment
   upiId: "",
   upiName: "BoundlessVisionz",

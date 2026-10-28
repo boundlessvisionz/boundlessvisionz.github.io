@@ -294,9 +294,8 @@
     $("#details-heading").textContent = digital ? "1. Your details" : "1. Delivery details";
     document.querySelectorAll("#address-step [data-physical]").forEach((el) => (el.hidden = digital));
     document.querySelectorAll("#address-step [data-digital]").forEach((el) => (el.hidden = !digital));
-    $("#phone-label").innerHTML = digital ? 'WhatsApp number <span class="muted">(optional)</span>' : "Phone number";
-    $("#address-step").phone.placeholder = digital ? "With country code if outside India" : "10-digit mobile";
-    $("#details-submit").textContent = digital ? "Continue on WhatsApp" : "Continue to payment";
+    $("#details-submit").textContent = digital ? "Place order" : "Continue to payment";
+    $("#details-submit").disabled = false;
 
     $("#buy-qr").src = cfg.upiQrImage;
     $("#buy-upi").textContent = cfg.upiId;
@@ -316,15 +315,44 @@
     $("#wa-step").hidden = true;
     $("#address-step").hidden = !open;
     $("#address-error").hidden = true;
+    $("#steps-track").hidden = !(open && digital);
+    setStep(1);
   }
 
-  // Short readable order ID, e.g. BV-241028-7K3Q
-  function newOrderId() {
-    const d = new Date();
-    const ymd = String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  function setStep(n) {
+    document.querySelectorAll("#steps-track li").forEach((li) => {
+      const k = Number(li.dataset.step);
+      li.classList.toggle("done", k < n);
+      li.classList.toggle("current", k === n);
+    });
+  }
+
+  // Backup order ID made in the browser if the Sheet can't be reached: BV-YYMMDDHH-XXXX (India time)
+  function localOrderId() {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" })
+        .formatToParts(new Date()).map((x) => [x.type, x.value])
+    );
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const rnd = Array.from(crypto.getRandomValues(new Uint8Array(4)), (n) => chars[n % chars.length]).join("");
-    return `BV-${ymd}-${rnd}`;
+    return `BV-${parts.year}${parts.month}${parts.day}${parts.hour}-${rnd}`;
+  }
+
+  // Send the order to her Google Sheet (Apps Script). Returns { orderId, emailSent } or throws.
+  async function recordOrder(payload) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const res = await fetch(cfg.orderEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // simple request: no CORS preflight
+        body: JSON.stringify(payload),
+        signal: ctrl.signal,
+      });
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   $("#format-opts").addEventListener("click", (e) => {
@@ -339,13 +367,6 @@
     const b = e.target.closest("[data-size]");
     if (b) { current.size = b.dataset.size; updateDetail(); }
   });
-  // Back from the WhatsApp step to the (still filled-in) digital form
-  $("#edit-digital").addEventListener("click", () => {
-    $("#wa-step").hidden = true;
-    $("#address-step").hidden = false;
-    $("#address-step").name.focus();
-  });
-
   // Back from payment to the (still filled-in) address form
   $("#edit-address").addEventListener("click", () => {
     $("#pay-step").hidden = true;
@@ -364,7 +385,6 @@
     if (!v.name) bad.push("name");
     if (isDigital(current)) {
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) bad.push("email");
-      if (v.phone && !/^\d{10,15}$/.test(v.phone)) bad.push("phone");
     } else {
       ["address", "city", "state"].forEach((k) => { if (!v[k]) bad.push(k); });
       if (!/^[6-9]\d{9}$/.test(v.phone)) bad.push("phone");
@@ -374,7 +394,7 @@
     return { v, bad };
   }
 
-  $("#address-step").addEventListener("submit", (e) => {
+  $("#address-step").addEventListener("submit", async (e) => {
     e.preventDefault();
     const { v, bad } = readAddress();
     if (bad.length) {
@@ -393,29 +413,40 @@
     const price = orderPrice(current);
     let msg;
     if (isDigital(current)) {
-      const orderId = newOrderId();
-      msg = [
-        "Hi! I'd like to order a digital download 🎨",
-        "",
-        `Order ID: ${orderId}`,
-        `Painting: ${p.title}`,
-        "Format: Digital download (300 DPI files)",
-        `Amount: ${formatPrice(price)}`,
-        "",
-        `Name: ${v.name}`,
-        `Email: ${v.email}`,
-        v.phone ? `WhatsApp: ${v.phone}` : null,
-        "",
-        "Please share the payment details.",
-      ].filter((line) => line !== null).join("\n");
-      const link = `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(msg)}`;
-      $("#wa-summary").textContent = `${v.name}\n${v.email}` + (v.phone ? `\n${v.phone}` : "");
+      const btn = $("#details-submit");
+      btn.disabled = true;
+      btn.textContent = "Placing order…";
+      const paintingLink = location.origin + location.pathname + paintingUrl(p);
+      let orderId = null, emailSent = false;
+      if (cfg.orderEndpoint) {
+        try {
+          const r = await recordOrder({
+            name: v.name, email: v.email, website: v.website || "",
+            painting: p.title, link: paintingLink, format: "digital", size: "", frame: "", amount: price,
+          });
+          if (r && r.ok) { orderId = r.orderId; emailSent = r.emailSent !== false; }
+          else if (r && r.error) {
+            btn.disabled = false; btn.textContent = "Place order";
+            $("#address-error").textContent = r.error;
+            $("#address-error").hidden = false;
+            return;
+          }
+        } catch (err) {
+          console.error("Order could not be recorded:", err); // fall through to a browser-made ID
+        }
+      }
+      if (!orderId) orderId = localOrderId();
+
+      msg = ["Hey Boundless Visionz!", `Painting: ${p.title}`, paintingLink, `Order ID: ${orderId}`].join("\n");
       $("#wa-order-id").textContent = orderId;
-      $("#wa-open").href = link;
+      $("#wa-email-note").textContent = emailSent
+        ? `A confirmation has been sent to ${v.email}.`
+        : "We'll confirm your order on WhatsApp.";
+      $("#wa-open").href = `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(msg)}`;
       $("#address-step").hidden = true;
       $("#wa-step").hidden = false;
-      $("#wa-step").scrollIntoView({ behavior: "smooth", block: "nearest" });
-      window.open(link, "_blank", "noopener"); // if the browser blocks this, the button above still works
+      setStep(2);
+      $("#steps-track").scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     } else {
       const addressLines = [v.address, v.landmark && "Landmark: " + v.landmark, `${v.city}, ${v.state} - ${v.pincode}`].filter(Boolean);

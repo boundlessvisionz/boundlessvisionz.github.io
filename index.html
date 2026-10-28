@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="images/favicon.png">
   <link rel="apple-touch-icon" href="images/favicon.png">
-  <link rel="stylesheet" href="style.css?v=20261028-1309">
+  <link rel="stylesheet" href="style.css?v=20261028-1621">
 </head>
 <body>
   <header class="site-header">
@@ -112,11 +112,18 @@
           <a class="btn small outline" href="#collections">Keep browsing</a>
         </div>
 
+        <ol class="steps-track" id="steps-track" hidden>
+          <li data-step="1">Your details</li>
+          <li data-step="2">Complete payment on WhatsApp</li>
+          <li data-step="3">Files sent to your email</li>
+        </ol>
+
         <form id="address-step" class="address-form" hidden novalidate>
           <h4 id="details-heading">1. Delivery details</h4>
           <label>Full name<input name="name" autocomplete="name" required></label>
           <label data-digital>Email <span class="muted">(your files will be sent here)</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
-          <label><span id="phone-label">Phone number</span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile"></label>
+          <label data-physical>Phone number<input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile"></label>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <label data-physical>Address<textarea name="address" rows="2" autocomplete="street-address" placeholder="House no., building, street, area" required></textarea></label>
           <label data-physical>Landmark <span class="muted">(optional)</span><input name="landmark"></label>
           <div class="row" data-physical>
@@ -129,14 +136,16 @@
         </form>
 
         <div id="wa-step" hidden>
-          <h4>2. Confirm on WhatsApp</h4>
-          <div class="ship-to">
-            <p id="wa-summary"></p>
-            <button class="link" id="edit-digital" type="button">Edit</button>
+          <div class="order-ok">
+            <strong>✓ Order <span id="wa-order-id"></span> placed!</strong>
+            <span id="wa-email-note"></span>
           </div>
-          <p class="wa-lead">Your order <strong id="wa-order-id"></strong> is ready. Tap below, then press <strong>Send</strong> in WhatsApp.</p>
-          <a class="btn wa-btn" id="wa-open" target="_blank" rel="noopener">Open WhatsApp</a>
-          <p class="muted small-note">We'll reply on WhatsApp with the payment details (UPI ID / QR). Once your payment is confirmed, your files are sent to your email.</p>
+          <p class="wa-lead"><strong>One last step: payment happens on WhatsApp.</strong> Tap below and press <strong>Send</strong>. We'll reply with the UPI details.</p>
+          <a class="btn wa-btn" id="wa-open" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12.04 2a9.9 9.9 0 0 0-8.5 15l-1.4 5.1 5.2-1.4A9.9 9.9 0 1 0 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3a8.2 8.2 0 1 1 7 3.9Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+            Complete Payment on WhatsApp
+          </a>
+          <p class="muted small-note">Once your payment is confirmed, your 300 DPI files are sent to your email.</p>
         </div>
 
         <div id="pay-step" hidden>
@@ -197,7 +206,7 @@
   </footer>
 
 
-  <script src="config.js?v=20261028-1309"></script>
-  <script src="app.js?v=20261028-1309"></script>
+  <script src="config.js?v=20261028-1621"></script>
+  <script src="app.js?v=20261028-1621"></script>
 </body>
 </html>
