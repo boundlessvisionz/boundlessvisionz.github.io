@@ -142,7 +142,20 @@ function sendConfirmation(orderId, o) {
   const item = o.format === "digital"
     ? "Digital download (300 DPI files)"
     : [o.size && o.size.replace("x", " × ") + " in", o.frame && o.frame + " frame"].filter(Boolean).join(" · ");
-  const waText = "Hey Boundless Visionz!\nPainting: " + o.painting + "\n" + (o.link || SITE_URL) + "\nOrder ID: " + orderId;
+  const waText = [
+    "Hey Boundless Visionz! I'd like to order a " + (o.format === "digital" ? "digital download" : "framed canvas") + " 🎨",
+    "",
+    "Order ID: " + orderId,
+    "Painting: " + o.painting,
+    o.link || SITE_URL,
+    "Format: " + item,
+    "Amount: " + amount,
+    "",
+    "Name: " + o.name,
+    "Email: " + o.email,
+    "",
+    "Please share the payment details.",
+  ].join("\n");
   const waLink = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(waText);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const next = o.format === "digital"

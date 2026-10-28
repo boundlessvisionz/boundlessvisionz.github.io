@@ -437,7 +437,20 @@
       }
       if (!orderId) orderId = localOrderId();
 
-      msg = ["Hey Boundless Visionz!", `Painting: ${p.title}`, paintingLink, `Order ID: ${orderId}`].join("\n");
+      msg = [
+        "Hey Boundless Visionz! I'd like to order a digital download 🎨",
+        "",
+        `Order ID: ${orderId}`,
+        `Painting: ${p.title}`,
+        paintingLink,
+        "Format: Digital download (300 DPI files)",
+        `Amount: ${formatPrice(price)}`,
+        "",
+        `Name: ${v.name}`,
+        `Email: ${v.email}`,
+        "",
+        "Please share the payment details.",
+      ].join("\n");
       $("#wa-order-id").textContent = orderId;
       $("#wa-email-note").textContent = emailSent
         ? `A confirmation has been sent to ${v.email}.`
