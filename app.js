@@ -304,10 +304,17 @@
     $("#buy-upi-link").href = "upi://pay?" + upi.toString();
 
     // Always start at the details step (details typed earlier are kept)
-    $("#orders-closed").hidden = !!cfg.ordersOpen;
+    const open = typeof cfg.ordersOpen === "object" ? !!cfg.ordersOpen[order.format] : !!cfg.ordersOpen;
+    const digitalOpen = typeof cfg.ordersOpen === "object" ? !!cfg.ordersOpen.digital : !!cfg.ordersOpen;
+    $("#closed-text").textContent = !digital && digitalOpen
+      ? "Framed canvas orders are opening very soon. Digital downloads of this painting are available now!"
+      : "We're putting the finishing touches on our shop. Orders will open very soon. Thank you for your patience!";
+    $("#closed-digital").hidden = digital || !digitalOpen;
+    $("#closed-digital").href = checkoutUrl({ ...order, format: "digital" });
+    $("#orders-closed").hidden = open;
     $("#pay-step").hidden = true;
     $("#wa-step").hidden = true;
-    $("#address-step").hidden = !cfg.ordersOpen;
+    $("#address-step").hidden = !open;
     $("#address-error").hidden = true;
   }
 

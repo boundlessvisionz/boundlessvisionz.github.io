@@ -9,9 +9,9 @@ window.SITE_CONFIG = {
     "Hi! I'm an artist who paints digitally and turns each piece into a framed print. " +
     "Every frame is made to order and packed with care.",
 
-  // Orders switch: false = checkout shows a "launching soon" note instead of payment/WhatsApp.
-  // Set to true once the real WhatsApp number, UPI ID, QR and prices are filled in.
-  ordersOpen: false,
+  // Orders switch per format: false = checkout shows a "launching soon" note instead.
+  // framed needs the real UPI ID, QR and prices before switching on.
+  ordersOpen: { digital: true, framed: false },
 
   // Contact (WhatsApp number with country code, digits only). Empty = hidden on the site.
   whatsappNumber: "918766791945",
